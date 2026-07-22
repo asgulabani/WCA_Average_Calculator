@@ -116,6 +116,6 @@ if st.button("Calculate"):
             st.markdown("### Average of 5")
         else:
             st.markdown("### Mean of 3")
-        st.metric(label=label, value=format_result(result))
+        st.metric( value=format_result(result))
 
-    st.caption("Times are shown in seconds and rounded to two decimal places.")
+    st.caption("Times are shown in seconds and rounded to two decimal places to match WCA standards.")
