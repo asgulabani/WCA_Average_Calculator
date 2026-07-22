@@ -105,5 +105,14 @@ if st.button("Calculate"):
         label = "Mo3"
 
     st.success(f"{label} result")
-    st.write("Sorted times (seconds):", sorted_values)
-    st.write(f"{label}: {format_result(result)}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("### Sorted times")
+        st.code("\n".join([f"{i + 1}. {value:.2f}" for i, value in enumerate(sorted_values)]), language="text")
+
+    with col2:
+        st.markdown("### Final result")
+        st.metric(label=label, value=format_result(result))
+
+    st.caption("Times are shown in seconds and rounded to two decimal places.")
