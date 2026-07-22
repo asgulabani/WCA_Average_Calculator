@@ -80,42 +80,67 @@ inputs = []
 for i in range(number_of_times):
     inputs.append(st.text_input(f"Enter time #{i + 1}", key=f"time_{i}"))
 
-# When the user clicks the button, calculate the result.
-if st.button("Calculate"):
-    values = []
-    for raw_value in inputs:
-        if not is_valid_time(raw_value):
-            # Show a fun error message and rotate through the list.
-            st.error(error_phrases[st.session_state.error_index])
-            st.session_state.error_index = (st.session_state.error_index + 1) % len(error_phrases)
-            st.stop()
+values = []
+for raw_value in inputs:
+    if raw_value is None or str(raw_value).strip() == "":
+        continue
+    if not is_valid_time(raw_value):
+        st.error(error_phrases[st.session_state.error_index])
+        st.session_state.error_index = (st.session_state.error_index + 1) % len(error_phrases)
+        st.stop()
+    values.append(math.trunc(to_seconds(raw_value) * 100) / 100)
 
-        # Convert the input to seconds and truncate to two decimal places.
-        values.append(math.trunc(to_seconds(raw_value) * 100) / 100)
+sorted_values = sorted(values)
 
-    sorted_values = sorted(values)  # Sort the times from best to worst.
-
-    if mode == "Ao5":
-        # Calculate the average of the three middle numbers for Ao5.
+if mode == "Ao5":
+    if len(values) >= 5:
         result = round(sum(sorted_values[1:4]) / 3, 2)
-        
     else:
-        # Calculate the mean of the three times for Mo3.
-        result = round(sum(sorted_values) / 3, 2)
-        
+        result = None
 
-    st.success("Calculation complete")
+    if len(values) == 4:
+        best_possible = round(sum(sorted_values[:3]) / 3, 2)
+        worst_possible = round(sum(sorted_values[-3:]) / 3, 2)
+    else:
+        best_possible = None
+        worst_possible = None
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("### Sorted times")
+    label = "Average of 5"
+else:
+    if len(values) >= 3:
+        result = round(sum(values[:3]) / 3, 2)
+    else:
+        result = None
+    best_possible = None
+    worst_possible = None
+    label = "Mean of 3"
+
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("### Sorted times")
+    if values:
         st.code("\n".join([f"{i + 1}. {value:.2f}" for i, value in enumerate(sorted_values)]), language="text")
+    else:
+        st.code("-", language="text")
 
-    with col2:
-        if mode == "Ao5":
-            st.markdown("### Average of 5")
-        else:
-            st.markdown("### Mean of 3")
+with col2:
+    st.markdown(f"### {label}")
+    if result is not None:
         st.metric(label="Result", value=format_result(result))
+    else:
+        st.metric(label="Result", value="-")
 
-    st.caption("Times are shown in seconds and rounded to two decimal places to match WCA standards.")
+if mode == "Ao5" and best_possible is not None and worst_possible is not None:
+    st.markdown("### Best and worst possible")
+    col3, col4 = st.columns(2)
+    with col3:
+        st.metric(label="BPA", value=format_result(best_possible))
+    with col4:
+        st.metric(label="WPA", value=format_result(worst_possible))
+else:
+    if mode == "Ao5":
+        st.markdown("### Best and worst possible")
+        st.metric(label="BPA", value="-")
+        st.metric(label="WPA", value="-")
+
+st.caption("Times are shown in seconds and rounded to two decimal places to match WCA standards.")
