@@ -131,7 +131,7 @@ with col2:
         st.metric(label="Result", value="-")
 
 if mode == "Ao5" and best_possible is not None and worst_possible is not None:
-    st.markdown("### Best and worst possible")
+    st.markdown("### Possible Averages")
     col3, col4 = st.columns(2)
     with col3:
         st.metric(label="BPA", value=format_result(best_possible))
@@ -139,7 +139,7 @@ if mode == "Ao5" and best_possible is not None and worst_possible is not None:
         st.metric(label="WPA", value=format_result(worst_possible))
 else:
     if mode == "Ao5":
-        st.markdown("### Best and worst possible")
+        st.markdown("### Possible Averages")
         st.metric(label="BPA", value="-")
         st.metric(label="WPA", value="-")
 
