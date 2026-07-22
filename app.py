@@ -98,13 +98,13 @@ if st.button("Calculate"):
     if mode == "Ao5":
         # Calculate the average of the three middle numbers for Ao5.
         result = round(sum(sorted_values[1:4]) / 3, 2)
-        label = "Ao5"
+        label = "Average of 5"
     else:
         # Calculate the mean of the three times for Mo3.
         result = round(sum(sorted_values) / 3, 2)
-        label = "Mo3"
+        label = "Mean of 3"
 
-    st.success(f"{label} result")
+    st.success("Calculation complete")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -112,7 +112,7 @@ if st.button("Calculate"):
         st.code("\n".join([f"{i + 1}. {value:.2f}" for i, value in enumerate(sorted_values)]), language="text")
 
     with col2:
-        st.markdown("### Final result")
+        st.markdown("### Result")
         st.metric(label=label, value=format_result(result))
 
     st.caption("Times are shown in seconds and rounded to two decimal places.")
