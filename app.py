@@ -75,6 +75,9 @@ error_phrases = [
 mode = st.radio("Select a mode", ["Ao5", "Mo3"], horizontal=True)
 number_of_times = 5 if mode == "Ao5" else 3
 
+st.markdown("### Target")
+target_input = st.text_input("Enter your target average", key="target_average")
+
 # Create text inputs so the user can enter the required number of times.
 inputs = []
 for i in range(number_of_times):
@@ -91,6 +94,13 @@ for raw_value in inputs:
     values.append(math.trunc(to_seconds(raw_value) * 100) / 100)
 
 sorted_values = sorted(values)
+
+target_seconds = None
+if target_input is not None and str(target_input).strip():
+    if not is_valid_time(target_input):
+        st.error("Please enter a valid target time.")
+        st.stop()
+    target_seconds = math.trunc(to_seconds(target_input) * 100) / 100
 
 if mode == "Ao5":
     if len(values) >= 5:
@@ -142,5 +152,42 @@ else:
         st.markdown("### Possible Averages")
         st.metric(label="BPA", value="-")
         st.metric(label="WPA", value="-")
+
+st.markdown("### Target")
+if target_seconds is not None:
+    if mode == "Ao5" and len(values) >= 4:
+        known = sorted(values[:4])
+        a, b, c, d = known
+        min_possible = round((a + b + c) / 3, 2)
+        max_possible = round((b + c + d) / 3, 2)
+
+        if target_seconds < min_possible - 1e-9 or target_seconds > max_possible + 1e-9:
+            target_value = "N/A"
+        elif abs(target_seconds - min_possible) < 1e-9:
+            target_value = f"Guaranteed (≤ {format_result(a)})"
+        elif abs(target_seconds - max_possible) < 1e-9:
+            target_value = f"Guaranteed (≥ {format_result(d)})"
+        else:
+            needed = round(3 * target_seconds - b - c, 2)
+            if needed < a - 1e-9 or needed > d + 1e-9:
+                target_value = "N/A"
+            else:
+                target_value = format_result(needed)
+    elif mode == "Mo3" and len(values) >= 2:
+        a, b = sorted(values[:2])
+        needed = round(3 * target_seconds - a - b, 2)
+        if needed < 0:
+            target_value = "N/A"
+        else:
+            target_value = format_result(needed)
+    else:
+        target_value = "-"
+else:
+    target_value = "-"
+
+if mode == "Ao5":
+    st.metric(label="Needed on 5th solve", value=target_value)
+else:
+    st.metric(label="Needed on 3rd solve", value=target_value)
 
 st.caption("Times are shown in seconds and rounded to two decimal places to match WCA standards.")
